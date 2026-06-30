@@ -273,7 +273,15 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
         }
         const parts = slug.split("/");
         const fileName = parts.at(-1);
-        return targetCanonical === fileName;
+        if (targetCanonical === fileName) {
+          return true;
+        }
+        // slugifyFilePath turns the path `foo/foo.md` to
+        // the slug `.../foo/index`, whose last segment is `index`,
+        // so [[foo]] misses the check above.
+        // Match such a slug by its folder name instead.
+        const folderName = parts.at(-2);
+        return fileName === "index" && folderName === targetCanonical;
       });
 
       if (matchingFileNames.length === 1) {
