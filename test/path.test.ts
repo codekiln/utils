@@ -464,6 +464,31 @@ describe("transformLink", () => {
     });
   });
 
+  describe("single-segment folder note (shortest)", () => {
+    // foo/foo.md collapses to slug ".../foo/index"; a bare [[foo]] should
+    // resolve to that folder note, mirroring the multi-segment behavior.
+    const folderNoteSlugs = ["notes/foo/index", "notes/bar", "index"] as FullSlug[];
+    const opts: TransformOptions = { strategy: "shortest", allSlugs: folderNoteSlugs };
+
+    it("resolves a bare name to a collapsed folder note URL", () => {
+      expect(transformLink("index" as FullSlug, "foo", opts)).toBe("./notes/foo/");
+    });
+
+    it("still resolves an ordinary page by its bare name", () => {
+      expect(transformLink("index" as FullSlug, "bar", opts)).toBe("./notes/bar");
+    });
+
+    it("resolves by full path when two files share a name", () => {
+      // blog/foo.md and stuff/foo/foo.md are both named "foo", so [[foo]] does
+      // not point to a single file. The "shortest" strategy uses a file's name
+      // when it is unique, and otherwise resolves the link by its full path —
+      // here "/foo".
+      const sharedName = ["blog/foo", "stuff/foo/index", "index"] as FullSlug[];
+      const sharedOpts: TransformOptions = { strategy: "shortest", allSlugs: sharedName };
+      expect(transformLink("index" as FullSlug, "foo", sharedOpts)).toBe("./foo");
+    });
+  });
+
   describe("multi-segment partial path (shortest)", () => {
     const multiSegSlugs = [
       "compendium/species/elf/wood",

@@ -199,7 +199,11 @@ function transformLink(src, target, opts) {
         }
         const parts = slug.split("/");
         const fileName = parts.at(-1);
-        return targetCanonical === fileName;
+        if (targetCanonical === fileName) {
+          return true;
+        }
+        const folderName = parts.at(-2);
+        return fileName === "index" && folderName === targetCanonical;
       });
       if (matchingFileNames.length === 1) {
         const matchedSlug = matchingFileNames[0];
